@@ -1,0 +1,18 @@
+{% extends '../base.html' %}
+{% load thumbnail %}
+{%block title%}
+  Посты сообщества
+{% endblock %}
+{% block content %}
+  <div class="container py-5">
+    {% block header %}
+        <h1>{{ title }}</h1>
+    {% endblock %}
+    <p>{{ description }}</p>
+    {% for post in page_obj %}
+      {% include 'posts/includes/post_list.html' %}
+    {% if not forloop.last %}<hr>{% endif %}
+    {% endfor %}
+    {% include 'posts/includes/paginator.html' %}
+  </div>
+{% endblock %}

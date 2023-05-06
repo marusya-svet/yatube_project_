@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% block title %}
+    {% if is_edit %}
+      Редактирование поста
+    {% else %}
+      Создание нового поста
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <div class="content container">
+      <div class="row">
+        <div class="col-md-8">
+            {% if is_edit %}
+              <h1>Редактировать запись</h1>
+            {% else %}
+              <h1>Добавить запись</h1>
+            {% endif %}
+              <form method="POST" enctype="multipart/form-data" class="post-form">
+                  {% csrf_token %}
+                  {{ form.as_p }}
+                  <button type="submit" class="btn btn-primary">
+                      {% if is_edit %}
+                        Сохранить
+                      {% else %}
+                        Добавить
+                      {% endif %}
+                  </button>
+              </form>
+        </div>
+      </div>
+    </div>
+{% endblock %}
