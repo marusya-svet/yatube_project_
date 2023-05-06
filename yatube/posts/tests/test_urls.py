@@ -60,8 +60,18 @@ class StaticURLTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_unexisting_page(self):
+        """У страницы 404 кастомный шаблон"""
         response = self.client.get('/unexisting_page/')
         self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed(response, 'core/404.html')
+
+    def test_csrf_castom(self):
+        """У страницы 403 кастомный шаблон"""
+        def server_error():
+            return HttpResponseForbidden()
+        response = server_error()
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'core/403csrf.html')
 
     def test_redirect_anonymous(self):
         """Проверка, что анонимному пользователю не доступны

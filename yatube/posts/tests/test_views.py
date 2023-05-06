@@ -78,6 +78,19 @@ class TestPagesTests(TestCase):
             group=cls.group,
             text='Тестовый пост',
         )
+        cls.image = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
         cls.user_following = User.objects.create_user(username='following_me')
         cls.user_not_follow = User.objects.create_user(username='not_follow_u')
 
@@ -197,6 +210,24 @@ class TestPagesTests(TestCase):
         new_posts = response_new.content
         self.assertNotEqual(old_posts, new_posts)
 
+    def test_follow_ones(self):
+        """Проверка, что можно подписываться и отписываться"""
+        follows = Follow.objects.count()
+        self.authorized_client.get(reverse(
+            'posts:profile_follow', args=[self.user_following_me]
+        ))
+        self.assertEqual(follows, Follow.objects.count() + 1)
+        self.assertTrue(
+            Follow.bjects.filter(
+                user=self.authorized_client,
+                author=self.user_following_me,
+            ).exists()
+        )
+        self.authorized_client.get(reverse(
+            'posts:profile_unfollow', args=[self.user_following_me]
+        ))
+        self.assertEqual(follows, Follow.objects.count())
+
     def test_new_post_for_followers(self):
         """Проверка, что новая запись автора видна тем,
         кто на него подписан и НЕТ для тех, кто не подписан"""
@@ -212,6 +243,23 @@ class TestPagesTests(TestCase):
         self.assertIn(new_post, response.context['page_obj'])
         response = self.user_not_follow_u.get(reverse('posts:follow_index'))
         self.assertNotIn(new_post, response.context['page_obj'])
+
+    def test_context_with_image(self):
+        reverse_names = [
+            reverse('posts:index'),
+            reverse('posts:group_list',
+                    args=[self.group.slug]),
+            reverse('posts:profile', args=[self.user.username]),
+            reverse('posts:post_detail', args=[self.post.pk])
+        ]
+        for revers_name in reverse_names:
+            response = self.authorized_client.get(revers_name)
+            if 'page_obj' in response.context:
+                first_obj = response.context['page_obj'][0]
+                self.assertEqual(first_obj.image, self.uploaded)
+            else:
+                post = response.context['post']
+                self.assertEqual(post.image, self.uploaded)
 
     def check_two_posts(self, obj):
         """Проверка двух постов"""

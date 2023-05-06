@@ -6,6 +6,7 @@ from django.test import Client, TestCase, override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 
 from ..models import Post, Group, Comment
 
@@ -39,6 +40,7 @@ class PostCreateFormTests(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        cache.clear()
 
     def test_create_post(self):
         """При отправке валидной формы создается пост"""
