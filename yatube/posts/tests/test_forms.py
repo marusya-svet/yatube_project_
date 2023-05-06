@@ -104,8 +104,7 @@ class PostCreateFormTests(TestCase):
             follow=True
         )
         self.assertRedirects(response, reverse(
-                'posts:profile', args=[self.user.username])
-                             )
+                'posts:profile', args=[self.user.username]))
         self.assertEqual(Post.objects.count(), posts_count + 1)
         new_post = Post.objects.latest('id')
         self.assertTrue(
