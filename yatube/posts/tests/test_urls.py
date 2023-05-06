@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
+from http import HttpResponseForbidden
 
 from ..models import Post, Group
 

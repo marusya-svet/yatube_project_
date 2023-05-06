@@ -78,19 +78,6 @@ class TestPagesTests(TestCase):
             group=cls.group,
             text='Тестовый пост',
         )
-        cls.image = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
-        cls.uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=small_gif,
-            content_type='image/gif'
-        )
         cls.user_following = User.objects.create_user(username='following_me')
         cls.user_not_follow = User.objects.create_user(username='not_follow_u')
 
@@ -245,10 +232,33 @@ class TestPagesTests(TestCase):
         self.assertNotIn(new_post, response.context['page_obj'])
 
     def test_context_with_image(self):
+        image = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=image,
+            content_type='image/gif'
+        )
+        form_data = {
+            'text': 'Тестовый текст',
+            'group': self.group.pk,
+            'image': uploaded,
+        }
+        self.authorized_client.post(
+            reverse('posts:post_create'),
+            data=form_data,
+            follow=True
+        )
         reverse_names = [
             reverse('posts:index'),
             reverse('posts:group_list',
-                    args=[self.group.slug]),
+                    args=[self.group.pk]),
             reverse('posts:profile', args=[self.user.username]),
             reverse('posts:post_detail', args=[self.post.pk])
         ]
@@ -256,10 +266,10 @@ class TestPagesTests(TestCase):
             response = self.authorized_client.get(revers_name)
             if 'page_obj' in response.context:
                 first_obj = response.context['page_obj'][0]
-                self.assertEqual(first_obj.image, self.uploaded)
+                self.assertEqual(first_obj.image, uploaded.content)
             else:
                 post = response.context['post']
-                self.assertEqual(post.image, self.uploaded)
+                self.assertEqual(post.image, uploaded.content)
 
     def check_two_posts(self, obj):
         """Проверка двух постов"""
