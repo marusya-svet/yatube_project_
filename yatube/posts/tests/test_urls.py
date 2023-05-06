@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
-from django.views.defaults import permission_denied
+from django.http import HttpResponseForbidden
 
 from ..models import Post, Group
 
@@ -68,7 +68,7 @@ class StaticURLTests(TestCase):
 
     def test_csrf_castom(self):
         """У страницы 403 кастомный шаблон"""
-        response = permission_denied
+        response = HttpResponseForbidden()
         self.assertEqual(response.status_code, 403)
         self.assertTemplateUsed(response, 'core/403csrf.html')
 

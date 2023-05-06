@@ -200,11 +200,9 @@ class TestPagesTests(TestCase):
 
     def test_follow_ones(self):
         """Проверка, что можно подписываться и отписываться"""
-        follows = Follow.objects.count()
         self.authorized_client.get(reverse(
             'posts:profile_follow', args=[self.user_following_me]
         ))
-        self.assertEqual(follows, Follow.objects.count() + 1)
         self.assertTrue(
             Follow.bjects.filter(
                 user=self.authorized_client,
@@ -214,7 +212,12 @@ class TestPagesTests(TestCase):
         self.authorized_client.get(reverse(
             'posts:profile_unfollow', args=[self.user_following_me]
         ))
-        self.assertEqual(follows, Follow.objects.count())
+        self.assertFalse(
+            Follow.bjects.filter(
+                user=self.authorized_client,
+                author=self.user_following_me,
+            ).exists()
+        )
 
     def test_new_post_for_followers(self):
         """Проверка, что новая запись автора видна тем,
@@ -270,7 +273,7 @@ class TestPagesTests(TestCase):
                 self.assertEqual(first_obj.image, uploaded.content)
             else:
                 post = response.context['post']
-                self.assertEqual(post.image, uploaded.content)
+                self.assertEqual(post.image, form_data['image'])
 
     def check_two_posts(self, obj):
         """Проверка двух постов"""
