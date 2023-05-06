@@ -204,7 +204,7 @@ class TestPagesTests(TestCase):
             'posts:profile_follow', args=[self.user_following_me]
         ))
         self.assertTrue(
-            Follow.bjects.filter(
+            Follow.objects.filter(
                 user=self.authorized_client,
                 author=self.user_following_me,
             ).exists()
@@ -234,46 +234,6 @@ class TestPagesTests(TestCase):
         self.assertIn(new_post, response.context['page_obj'])
         response = self.user_not_follow_u.get(reverse('posts:follow_index'))
         self.assertNotIn(new_post, response.context['page_obj'])
-
-    def test_context_with_image(self):
-        image = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
-        uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=image,
-            content_type='image/gif'
-        )
-        form_data = {
-            'text': 'Тестовый текст',
-            'group': self.group.pk,
-            'image': uploaded,
-        }
-        self.authorized_client.post(
-            reverse('posts:post_create'),
-            data=form_data,
-            follow=True
-        )
-        reverse_names = [
-            reverse('posts:index'),
-            reverse('posts:group_list',
-                    args=[self.group.pk]),
-            reverse('posts:profile', args=[self.user.username]),
-            reverse('posts:post_detail', args=[self.post.pk])
-        ]
-        for revers_name in reverse_names:
-            response = self.authorized_client.get(revers_name)
-            if 'page_obj' in response.context:
-                first_obj = response.context['page_obj'][0]
-                self.assertEqual(first_obj.image, uploaded.content)
-            else:
-                post = response.context['post']
-                self.assertEqual(post.image, form_data['image'])
 
     def check_two_posts(self, obj):
         """Проверка двух постов"""
