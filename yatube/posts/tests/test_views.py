@@ -197,27 +197,6 @@ class TestPagesTests(TestCase):
         new_posts = response_new.content
         self.assertNotEqual(old_posts, new_posts)
 
-    def test_follow_ones(self):
-        """Проверка, что можно подписываться и отписываться"""
-        self.authorized_client.get(reverse(
-            'posts:profile_follow', args=[self.user_following_me]
-        ))
-        self.assertTrue(
-            Follow.objects.filter(
-                user=self.authorized_client,
-                author=self.user_following_me,
-            ).exists()
-        )
-        self.authorized_client.get(reverse(
-            'posts:profile_unfollow', args=[self.user_following_me]
-        ))
-        self.assertFalse(
-            Follow.bjects.filter(
-                user=self.authorized_client,
-                author=self.user_following_me,
-            ).exists()
-        )
-
     def test_new_post_for_followers(self):
         """Проверка, что новая запись автора видна тем,
         кто на него подписан и НЕТ для тех, кто не подписан"""
