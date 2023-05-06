@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from ..models import Group, Post, Follow
 from ..forms import PostForm
