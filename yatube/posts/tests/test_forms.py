@@ -116,6 +116,18 @@ class PostCreateFormTests(TestCase):
                 image='posts/small.gif'
             ).exists()
         )
+        responses = [
+            reverse('posts:index'),
+            reverse('posts:group_list',
+                    args=[new_post.group.slug]),
+            reverse('posts:profile', args=[self.user.username]),
+        ]
+        for reverse_name in responses:
+            response = self.authorized_client.get(reverse_name)
+            self.assertIn(new_post, response.context['page_obj'])
+        response = self.authorized_client.get(reverse(
+            'posts:post_detail', args=[new_post.pk]))
+        self.assertEqual(new_post, response.context['post'])
 
     def test_comment_shows_on_post(self):
         """При отпраке комментария он создается под постом"""

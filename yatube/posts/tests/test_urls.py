@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
+from django.core.cache import cache
 
 from ..models import Post, Group
 
@@ -28,6 +29,7 @@ class StaticURLTests(TestCase):
         self.user2 = User.objects.create_user(username='noname')
         self.author = Client()
         self.author.force_login(self.user2)
+        cache.clear()
 
     def test_urls_templates(self):
         """Проверка соответсвия шаблонов и url-адресов доступные всем"""

@@ -213,6 +213,20 @@ class TestPagesTests(TestCase):
         response = self.user_not_follow_u.get(reverse('posts:follow_index'))
         self.assertNotIn(new_post, response.context['page_obj'])
 
+    def test_follow_ones(self):
+        """Проверка, что можно подписываться и отписываться"""
+        follows = self.user.follower.count()
+        Follow.objects.create(
+            user=self.user,
+            author=self.user_not_follow
+        )
+        self.assertEqual(follows + 1, self.user.follower.count())
+        Follow.objects.filter(
+            user=self.user,
+            author=self.user_not_follow
+        ).delete()
+        self.assertEqual(follows, self.user.follower.count())
+
     def check_two_posts(self, obj):
         """Проверка двух постов"""
         self.assertEqual(obj.author, self.post.author)
