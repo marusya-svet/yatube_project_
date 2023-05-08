@@ -224,7 +224,8 @@ class TestPagesTests(TestCase):
         self.assertEqual(follows + 1, self.user.follower.count())
         follow_latest = Follow.objects.latest('id')
         self.assertEqual(follow_latest.user.username, self.user.username)
-        self.assertEqual(follow_latest.author.username, self.user_following.username)
+        self.assertEqual(follow_latest.author.username,
+                         self.user_following.username)
 
     def check_two_posts(self, obj):
         """Проверка двух постов"""
