@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -43,7 +44,7 @@ class PaginatorViewsTest(TestCase):
         for reverse_name in reverse_name_paginator:
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name)
-                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
                 self.assertEqual(len(response.context['page_obj']),
                                  POSTS_SHOWN)
 
@@ -58,7 +59,7 @@ class PaginatorViewsTest(TestCase):
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(
                     reverse_name + '?page=2')
-                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
                 self.assertEqual(len(response.context['page_obj']),
                                  Post.objects.count() - POSTS_SHOWN)
 
@@ -214,18 +215,16 @@ class TestPagesTests(TestCase):
         self.assertNotIn(new_post, response.context['page_obj'])
 
     def test_follow_ones(self):
-        """Проверка, что можно подписываться и отписываться"""
+        """Проверка, что можно подписаться на пользователя"""
         follows = self.user.follower.count()
-        Follow.objects.create(
-            user=self.user,
-            author=self.user_not_follow
+        self.authorized_client.get(reverse(
+            'posts:profile_follow',
+            args=[self.user_following.username])
         )
         self.assertEqual(follows + 1, self.user.follower.count())
-        Follow.objects.filter(
-            user=self.user,
-            author=self.user_not_follow
-        ).delete()
-        self.assertEqual(follows, self.user.follower.count())
+        follow_latest = Follow.objects.latest('id')
+        self.assertEqual(follow_latest.user.username, self.user.username)
+        self.assertEqual(follow_latest.author.username, self.user_following.username)
 
     def check_two_posts(self, obj):
         """Проверка двух постов"""
